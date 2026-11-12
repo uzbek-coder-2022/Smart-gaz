@@ -1,0 +1,35 @@
+{% extends "layouts/base.html" %}
+{% block title %}Qanday ishlaydi — SmartGaz{% endblock %}
+{% block content %}
+<div class="sg-container">
+  <h1 class="sg-section-title" style="margin-top:0;">Qanday ishlaydi</h1>
+  <div class="sg-card">
+    <div class="sg-steps">
+      <div class="sg-step"><div class="sg-step-num">1</div><h3>Ro'yxatdan o'tish</h3><p>Telefon raqam orqali 1 daqiqada ro'yxatdan o'ting. Ism-familiya va manzilni kiriting.</p></div>
+      <div class="sg-step"><div class="sg-step-num">2</div><h3>Xonadonni tasdiqlash</h3><p>MFY vakili manzilingizni tasdiqlaydi. Bir kadastr raqamida bir necha oila alohida qayd etiladi.</p></div>
+      <div class="sg-step"><div class="sg-step-num">3</div><h3>Navbatga turish</h3><p>"Navbatga turish" tugmasini bosing. Tizim sizga mahalla ichidagi tartib raqamini beradi.</p></div>
+      <div class="sg-step"><div class="sg-step-num">4</div><h3>Marshrutga kirish</h3><p>Dispecher sizning navbatingizni kunlik marshrutga kiritganda SMS/Telegram orqali xabar olasiz.</p></div>
+      <div class="sg-step"><div class="sg-step-num">5</div><h3>Mashina yo'lda</h3><p>Mashina mahallaga chiqqanda xaritada uning joylashuvini kuzatishingiz mumkin.</p></div>
+      <div class="sg-step"><div class="sg-step-num">6</div><h3>Balonni qabul qilish</h3><p>Haydovchi balonni keltiradi. Bo'sh balonni almashtirib, to'lovni amalga oshiring (naqd, karta yoki onlayn).</p></div>
+    </div>
+  </div>
+
+  <h2 class="sg-section-title">Qoidalar</h2>
+  <div class="sg-card">
+    <ul style="line-height:2; margin:0; padding-left:20px;">
+      <li>🔄 Bitta xonadonga <strong>20 kunda 1 ta</strong> ballon beriladi (sozlanadi).</li>
+      <li>📋 Navbat <strong>FIFO</strong> tamoyili asosida — kim oldin turgan bo'lsa, o'sha oldin oladi.</li>
+      <li>🚛 Bir mashinaga kuniga 40 tagacha ballon yuklanadi (mashina sig'imiga qarab).</li>
+      <li>📍 Mashina harakatlanayotganda GPS kuzatuvi ishlaydi (har 30 soniyada).</li>
+      <li>🏠 Agar siz uyda bo'lmasangiz, navbat raqamingiz saqlanib keyingi marshrutga o'tkaziladi.</li>
+      <li>⚖️ Adolat va shaffoflik — har bir harakat audit jurnalida qayd etiladi.</li>
+    </ul>
+  </div>
+
+  <h2 class="sg-section-title">Ishonch telefoni</h2>
+  <div class="sg-card sg-text-center">
+    <div style="font-size:28px; font-weight:800; color:var(--sg-primary-dark);">📞 1164</div>
+    <p class="sg-muted">24/7 dispecherlik xizmati</p>
+  </div>
+</div>
+{% endblock %}

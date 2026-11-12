@@ -1,0 +1,38 @@
+{% extends "layouts/base.html" %}
+{% block title %}Ro'yxatdan o'tish — SmartGaz{% endblock %}
+{% block content %}
+<div class="sg-container" style="max-width:560px;">
+  <div class="sg-card" style="margin-top:20px;">
+    <h2>👤 Ro'yxatdan o'tish</h2>
+    <form id="reg-form">
+      <div class="sg-form-group"><label>Ism va familiya</label><input name="full_name" class="sg-input" required minlength="2"></div>
+      <div class="sg-form-group"><label>Telefon raqam</label><input name="phone" class="sg-input" placeholder="+998901234567" required pattern="[+]?998[0-9]{9}"></div>
+      <div class="sg-form-group"><label>Parol (kamida 6 belgi)</label><input type="password" name="password" class="sg-input" required minlength="6"></div>
+      <p class="sg-muted">Keyingi bosqichda xonadon manzilingizni kiritishingiz mumkin.</p>
+      <button type="submit" class="sg-btn sg-btn-primary sg-btn-block">Ro'yxatdan o'tish</button>
+      <p class="sg-text-center sg-muted sg-mt-4">Akkauntingiz bormi? <a href="/login">Kirish</a></p>
+    </form>
+    <div id="reg-msg"></div>
+  </div>
+</div>
+<script>
+document.getElementById('reg-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const msg = document.getElementById('reg-msg');
+  try {
+    const data = await SG.api('/auth/register', {
+      method:'POST',
+      body:{
+        full_name: fd.get('full_name'),
+        phone: fd.get('phone'),
+        password: fd.get('password'),
+        role: 'citizen'
+      }
+    });
+    SG.setToken(data.access_token, data.user);
+    location.href = '/cabinet';
+  } catch(err){ msg.innerHTML = `<div class="sg-alert sg-alert-error">${err.message}</div>`; }
+});
+</script>
+{% endblock %}

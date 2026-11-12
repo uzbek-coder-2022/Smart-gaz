@@ -1,0 +1,108 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<section class="sg-hero">
+  <h1>🏡 Gaz ballon navbati — endi shaffof va adolatli</h1>
+  <p>SmartGaz orqali elektron navbatga turing, mashina qayerdaligini real vaqtda kuzating, belgilangan muddatda gaz oling. Navbat raqami, o'rniz va taxminiy yetkazish sanasi — barchasi bir joyda.</p>
+  <div>
+    <a href="/register" class="sg-cta">Navbatga turish →</a>
+    <a href="/how" class="sg-cta-secondary">Qanday ishlaydi</a>
+  </div>
+</section>
+
+<div class="sg-container">
+  <div class="sg-stats">
+    <div class="sg-stat-card">
+      <div class="sg-stat-value" id="stat-households">—</div>
+      <div class="sg-stat-label">Ro'yxatdagi xonadonlar</div>
+    </div>
+    <div class="sg-stat-card">
+      <div class="sg-stat-value" id="stat-pending">—</div>
+      <div class="sg-stat-label">Navbat kutmoqda</div>
+    </div>
+    <div class="sg-stat-card">
+      <div class="sg-stat-value" id="stat-onway">—</div>
+      <div class="sg-stat-label">Yo'lda</div>
+    </div>
+    <div class="sg-stat-card">
+      <div class="sg-stat-value" id="stat-delivered">—</div>
+      <div class="sg-stat-label">Bugun yetkazildi</div>
+    </div>
+  </div>
+
+  <div class="sg-card">
+    <h2>📋 Navbat holatini telefon raqam orqali tekshirish</h2>
+    <p class="sg-muted">Ro'yxatdan o'tmasdan ham, telefon raqamingiz orqali navbat holatini bilishingiz mumkin.</p>
+    <form id="queue-check-form" class="sg-row" style="grid-template-columns:1fr auto; gap:8px; margin-top:12px;">
+      <input type="tel" name="phone" class="sg-input" placeholder="+998901234567" required pattern="[+]?998[0-9]{9}">
+      <button class="sg-btn sg-btn-primary">Tekshirish</button>
+    </form>
+    <div id="queue-result" style="margin-top:16px;"></div>
+  </div>
+
+  <h2 class="sg-section-title">Nima uchun SmartGaz?</h2>
+  <div class="sg-steps">
+    <div class="sg-step">
+      <div class="sg-step-num">1</div>
+      <h3>Ro'yxatdan o'ting</h3>
+      <p class="sg-muted">Telefon raqam orqali tez ro'yxatdan o'tib, xonadon manzilingizni kiriting.</p>
+    </div>
+    <div class="sg-step">
+      <div class="sg-step-num">2</div>
+      <h3>Navbatga turing</h3>
+      <p class="sg-muted">Bir tugma bilan mahallangiz kesimidagi elektron navbatga qo'shiling.</p>
+    </div>
+    <div class="sg-step">
+      <div class="sg-step-num">3</div>
+      <h3>Mashinani kuzating</h3>
+      <p class="sg-muted">Gaz tashuvchi mashina yo'lga chiqqanda xaritada real vaqtda ko'ring.</p>
+    </div>
+    <div class="sg-step">
+      <div class="sg-step-num">4</div>
+      <h3>Qabul qiling</h3>
+      <p class="sg-muted">Balonni qabul qiling, to'lovni amalga oshiring — keyingi navbat avtomatik ochiladi.</p>
+    </div>
+  </div>
+
+  <h2 class="sg-section-title">Tez-tez so'raladigan savollar</h2>
+  <div class="sg-card">
+    <div class="sg-faq-item"><div class="sg-faq-q">Qanchada muddatda gaz yetkaziladi? <span>+</span></div><div class="sg-faq-a">Har bir mahalla uchun kunlik reja belgilangan. Taxminiy sana navbatdagi o'rningizga qarab hisoblanadi va kabinetingizda ko'rsatiladi (o'rtacha 1-3 kun).</div></div>
+    <div class="sg-faq-item"><div class="sg-faq-q">Qayta navbatga qachon turishim mumkin? <span>+</span></div><div class="sg-faq-a">Gaz olingandan keyin 20 kun o'tgach, tizim sizga avtomatik ravishda qayta navbatga turish imkonini beradi.</div></div>
+    <div class="sg-faq-item"><div class="sg-faq-q">Mashina kelmadi — nima qilaman? <span>+</span></div><div class="sg-faq-a">Kabinetdagi "Shikoyat yuborish" bo'limidan dispecherga murojaat yuborishingiz mumkin. Dispecher muammoni ko'rib chiqadi.</div></div>
+    <div class="sg-faq-item"><div class="sg-faq-q">Telegram-bot orqali ham foydalansa bo'ladimi? <span>+</span></div><div class="sg-faq-a">Ha. Telegram-bot orqali navbatga turish, holatini ko'rish va mashina lokatsiyasini kuzatish mumkin. Bot tez orada ishga tushiriladi.</div></div>
+  </div>
+</div>
+
+<script>
+(async function(){
+  try {
+    const s = await SG.api('/admin/stats').catch(() => null);
+    if (s) {
+      document.getElementById('stat-households').textContent = s.households_total.toLocaleString();
+      document.getElementById('stat-pending').textContent = s.orders_pending.toLocaleString();
+      document.getElementById('stat-onway').textContent = s.orders_on_way.toLocaleString();
+      document.getElementById('stat-delivered').textContent = s.delivered_today.toLocaleString();
+    }
+  } catch(e){}
+
+  document.getElementById('queue-check-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const phone = e.target.phone.value;
+    const out = document.getElementById('queue-result');
+    out.innerHTML = '<div class="sg-alert sg-alert-info">Tekshirilmoqda...</div>';
+    // Quick check: user must be logged in to see personal queue; tell them to log in
+    if (!SG.token) {
+      out.innerHTML = `<div class="sg-alert sg-alert-warn">Shaxsiy navbat holatini ko'rish uchun <a href="/login?next=/">tizimga kiring</a> yoki <a href="/register">ro'yxatdan o'ting</a>.</div>`;
+      return;
+    }
+    try {
+      const q = await SG.api('/orders/queue-status/me');
+      if (q.order_id) {
+        out.innerHTML = `<div class="sg-alert sg-alert-success"><strong>Navbat #${q.queue_number}</strong> · ${SG.badge(q.status).outerHTML || q.status} · ${q.position ? "Siz " + q.position + "-o'rindasiz" : ""} · Taxminiy sana: <strong>${q.estimated_delivery_date || '—'}</strong></div>`;
+      } else {
+        out.innerHTML = '<div class="sg-alert sg-alert-info">Siz hozirda navbatda emassiz. <a href="/cabinet">Kabinetga o\'tib</a> navbatga turing.</div>';
+      }
+    } catch(err){ out.innerHTML = `<div class="sg-alert sg-alert-error">${err.message}</div>`; }
+  });
+})();
+</script>
+{% endblock %}

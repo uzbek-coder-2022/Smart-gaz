@@ -1,0 +1,147 @@
+{% extends "layouts/base.html" %}
+{% block title %}Dispecher paneli — SmartGaz{% endblock %}
+{% block content %}
+<div class="sg-container">
+  <h1 class="sg-section-title" style="margin-top:0;">📋 Dispecher paneli</h1>
+
+  <div class="sg-stats" id="stats"></div>
+
+  <div class="sg-tabs">
+    <button class="sg-tab sg-tab-active" data-tab="queue">Navbat</button>
+    <button class="sg-tab" data-tab="routes">Marshrutlar</button>
+    <button class="sg-tab" data-tab="map">Xarita</button>
+    <button class="sg-tab" data-tab="complaints">Murojaatlar</button>
+  </div>
+
+  <div id="tab-queue" class="tab-content">
+    <div class="sg-card">
+      <h2>Navbatga turgan xonadonlar</h2>
+      <div class="sg-row sg-mb">
+        <select class="sg-select" id="filter-mahalla"><option value="">Barcha mahallalar</option></select>
+      </div>
+      <div class="sg-table-wrap"><table class="sg-table">
+        <thead><tr><th>Navbat #</th><th>Holat</th><th>Mahalla</th><th>Manzil</th><th>Telefon</th><th>So'ralgan sana</th><th>Amallar</th></tr></thead>
+        <tbody id="queue-tbody"><tr><td colspan="7" class="sg-muted">Yuklanmoqda...</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div id="tab-routes" class="tab-content" style="display:none;">
+    <div class="sg-grid-2">
+      <div class="sg-card">
+        <h2>Yangi marshrut yaratish</h2>
+        <form id="route-form">
+          <div class="sg-form-group"><label>Haydovchi</label><select name="driver_id" class="sg-select" id="drivers-sel" required></select></div>
+          <div class="sg-form-group"><label>Mahalla</label><select name="mahalla_id" class="sg-select" id="route-mahalla-sel" required></select></div>
+          <div class="sg-row">
+            <div class="sg-form-group"><label>Ballonlar soni</label><input type="number" name="allocated_cylinders" class="sg-input" value="40" min="1" max="200" required></div>
+            <div class="sg-form-group"><label>Sana</label><input type="date" name="route_date" class="sg-input" required></div>
+          </div>
+          <button class="sg-btn sg-btn-primary sg-btn-block">Marshrut yaratish</button>
+        </form>
+      </div>
+      <div class="sg-card">
+        <h2>So'nggi marshrutlar</h2>
+        <div id="routes-list" class="sg-muted">Yuklanmoqda...</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-map" class="tab-content" style="display:none;">
+    <div class="sg-card">
+      <h2>🚛 Faol mashinalar xaritasi</h2>
+      <div id="map" style="height:500px;"></div>
+      <div id="drivers-list" class="sg-mt-4"></div>
+    </div>
+  </div>
+
+  <div id="tab-complaints" class="tab-content" style="display:none;">
+    <div class="sg-card">
+      <h2>Murojaatlar</h2>
+      <p class="sg-muted">Murojaat moduli keyingi yangilanishda to'liq amalga oshiriladi.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const tabs = document.querySelectorAll('.sg-tab');
+tabs.forEach(t => t.addEventListener('click', () => {
+  tabs.forEach(x => x.classList.remove('sg-tab-active'));
+  t.classList.add('sg-tab-active');
+  document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+  document.getElementById('tab-' + t.dataset.tab).style.display = '';
+  if (t.dataset.tab === 'map') loadMap();
+}));
+
+async function loadStats(){
+  try {
+    const s = await SG.api('/admin/stats');
+    document.getElementById('stats').innerHTML = `
+      <div class="sg-stat-card"><div class="sg-stat-value">${s.households_total}</div><div class="sg-stat-label">Xonadonlar</div></div>
+      <div class="sg-stat-card"><div class="sg-stat-value">${s.orders_pending}</div><div class="sg-stat-label">Navbatda</div></div>
+      <div class="sg-stat-card"><div class="sg-stat-value">${s.orders_on_way}</div><div class="sg-stat-label">Yo'lda</div></div>
+      <div class="sg-stat-card"><div class="sg-stat-value">${s.delivered_today}</div><div class="sg-stat-label">Bugun yetkazildi</div></div>
+      <div class="sg-stat-card"><div class="sg-stat-value">${s.active_drivers}</div><div class="sg-stat-label">Faol haydovchilar</div></div>
+      <div class="sg-stat-card"><div class="sg-stat-value">${s.active_routes}</div><div class="sg-stat-label">Faol marshrutlar</div></div>`;
+  } catch(e){}
+}
+
+async function loadTerritorySelects(){
+  const regions = await SG.api('/territory/regions');
+  // seed data only has one district/mahalla — fill them
+  const mahSel = document.getElementById('filter-mahalla');
+  const routeMah = document.getElementById('route-mahalla-sel');
+  const drvSel = document.getElementById('drivers-sel');
+  regions.forEach(r => r.districts.forEach(d => {
+    // fetch mahallas for each district
+  }));
+  // For demo, fetch sample mahalla (id 1) and add option
+  mahSel.innerHTML = '<option value="">Barcha mahallalar</option>';
+  routeMah.innerHTML = '';
+  // Seed mahallas id 1 and 2
+  mahSel.innerHTML += '<option value="1">O\'zbekiston mahallasi (Asaka)</option><option value="2">Navbahor mahallasi (Asaka)</option>';
+  routeMah.innerHTML += '<option value="1">O\'zbekiston mahallasi (Asaka)</option><option value="2">Navbahor mahallasi (Asaka)</option>';
+
+  // Drivers (hardcoded for seed demo; real app should have /admin/drivers endpoint)
+  drvSel.innerHTML = '<option value="1">Haydovchi Botir — 01A777AA (40 ballon)</option>';
+}
+
+async function loadQueue(){
+  // Queue list endpoint not yet built — show placeholder
+  const tb = document.getElementById('queue-tbody');
+  tb.innerHTML = '<tr><td colspan="7" class="sg-muted">Navbat ro\'yxati API keyingi bosqichda to\'liq ulanadi. Hozircha siz fuqaro kabinetidan o\'z holatingizni ko\'rishingiz mumkin.</td></tr>';
+}
+
+document.getElementById('route-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  try {
+    const r = await SG.api('/routes/admin',{method:'POST', body:{
+      driver_id: parseInt(fd.get('driver_id')),
+      mahalla_id: parseInt(fd.get('mahalla_id')),
+      allocated_cylinders: parseInt(fd.get('allocated_cylinders')),
+      route_date: fd.get('route_date')
+    }});
+    SG.showAlert(`Marshrut #${r.id} yaratildi (${r.orders.length} buyurtma)`,'success');
+    await loadStats();
+  } catch(err){ SG.showAlert(err.message,'error'); }
+});
+document.querySelector('[name=route_date]').valueAsDate = new Date();
+
+let dispMap = null;
+let dispMarkers = [];
+async function loadMap(){
+  if (dispMap) return;
+  dispMap = L.map('map').setView([40.6,72.3], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(dispMap);
+  document.getElementById('drivers-list').innerHTML = '<p class="sg-muted">Haydovchilar GPS ma\'lumotlari real vaqtda ko\'rsatiladi.</p>';
+}
+
+(async function init(){
+  await loadStats();
+  await loadTerritorySelects();
+  await loadQueue();
+  setInterval(loadStats, 15000);
+})();
+</script>
+{% endblock %}

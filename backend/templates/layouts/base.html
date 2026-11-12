@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0ea55e" />
+  <title>{% block title %}SmartGaz — Suyultirilgan gaz yetkazib berish{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/app.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="sg-topbar">
+    <div class="sg-topbar-inner">
+      <a href="/" class="sg-logo">
+        <span class="sg-logo-badge">⛽</span> SmartGaz
+      </a>
+      <nav class="sg-nav">
+        <a href="/" class="{% if request.url.path == '/' %}sg-active{% endif %}">Bosh sahifa</a>
+        <a href="/how" class="{% if request.url.path == '/how' %}sg-active{% endif %}">Qanday ishlaydi</a>
+        <a href="/queue" class="{% if request.url.path == '/queue' %}sg-active{% endif %}">Navbat holati</a>
+        {% if user %}
+          {% if user.role == 'citizen' %}
+            <a href="/cabinet" class="{% if '/cabinet' in request.url.path %}sg-active{% endif %}">Kabinet</a>
+          {% elif user.role == 'driver' %}
+            <a href="/driver" class="{% if '/driver' in request.url.path %}sg-active{% endif %}">Haydovchi</a>
+          {% elif user.role == 'dispatcher' %}
+            <a href="/dispatcher" class="{% if '/dispatcher' in request.url.path %}sg-active{% endif %}">Dispecher</a>
+          {% elif user.role == 'mfy' %}
+            <a href="/mfy" class="{% if '/mfy' in request.url.path %}sg-active{% endif %}">MFY</a>
+          {% elif user.role in ('admin','operator_head') %}
+            <a href="/admin" class="{% if '/admin' in request.url.path %}sg-active{% endif %}">Admin</a>
+          {% endif %}
+          <span style="color:rgba(255,255,255,.75); font-size:13px; margin-left:8px;">{{ user.full_name }}</span>
+          <button onclick="SG.logout()">Chiqish</button>
+        {% else %}
+          <a href="/login">Kirish</a>
+          <a href="/register" style="background:rgba(255,255,255,.2); border-radius:8px; padding:8px 14px; font-weight:600;">Ro'yxatdan o'tish</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  {% block content %}{% endblock %}
+
+  <footer class="sg-footer">
+    <div class="sg-container" style="padding:0;">
+      SmartGaz © 2026 · Qishloq hududlarida suyultirilgan gaz yetkazib berish raqamli platformasi
+    </div>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

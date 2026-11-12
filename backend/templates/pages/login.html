@@ -1,0 +1,35 @@
+{% extends "layouts/base.html" %}
+{% block title %}Kirish — SmartGaz{% endblock %}
+{% block content %}
+<div class="sg-container" style="max-width:440px;">
+  <div class="sg-card" style="margin-top:40px;">
+    <h2>🔐 Tizimga kirish</h2>
+    <form id="login-form">
+      <div class="sg-form-group">
+        <label>Telefon raqam</label>
+        <input type="tel" name="phone" class="sg-input" placeholder="+998901234567" required pattern="[+]?998[0-9]{9}">
+      </div>
+      <div class="sg-form-group">
+        <label>Parol</label>
+        <input type="password" name="password" class="sg-input" required minlength="6">
+      </div>
+      <button type="submit" class="sg-btn sg-btn-primary sg-btn-block">Kirish</button>
+      <p class="sg-text-center sg-muted sg-mt-4">Akkauntingiz yo'qmi? <a href="/register">Ro'yxatdan o'tish</a></p>
+    </form>
+    <div id="login-msg"></div>
+  </div>
+</div>
+<script>
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const msg = document.getElementById('login-msg');
+  try {
+    const data = await SG.api('/auth/login', { method:'POST', body:{ phone:fd.get('phone'), password:fd.get('password') }});
+    SG.setToken(data.access_token, data.user);
+    const next = new URLSearchParams(location.search).get('next') || '/cabinet';
+    location.href = next;
+  } catch(err){ msg.innerHTML = `<div class="sg-alert sg-alert-error">${err.message}</div>`; }
+});
+</script>
+{% endblock %}

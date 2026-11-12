@@ -1,0 +1,6 @@
+<nav class="sg-bottomnav">
+  <a href="/cabinet" class="{% if '/cabinet' in request.url.path %}active{% endif %}">🏠<span>Bosh sahifa</span></a>
+  <a href="/cabinet#queue" class="{% if '/queue' in request.url.path %}active{% endif %}">📋<span>Navbat</span></a>
+  <a href="/cabinet#map" class="{% if '/map' in request.url.path %}active{% endif %}">🚚<span>Mashina</span></a>
+  <a href="/cabinet#profile" class="{% if '/profile' in request.url.path %}active{% endif %}">👤<span>Profil</span></a>
+</nav>

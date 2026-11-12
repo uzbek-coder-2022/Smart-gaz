@@ -1,0 +1,92 @@
+{% extends "layouts/base.html" %}
+{% block title %}Administrator paneli — SmartGaz{% endblock %}
+{% block content %}
+<div class="sg-container">
+  <h1 class="sg-section-title" style="margin-top:0;">⚙️ Administrator paneli</h1>
+
+  <div class="sg-stats" id="admin-stats"></div>
+
+  <div class="sg-tabs">
+    <button class="sg-tab sg-tab-active" data-tab="drivers">Haydovchilar</button>
+    <button class="sg-tab" data-tab="users">Foydalanuvchilar</button>
+    <button class="sg-tab" data-tab="regions">Hududlar</button>
+    <button class="sg-tab" data-tab="settings">Sozlamalar</button>
+  </div>
+
+  <div id="tab-drivers" class="tab-content">
+    <div class="sg-card">
+      <h2>🚛 Haydovchilar</h2>
+      <form id="driver-form" class="sg-row" style="align-items:end; grid-template-columns: 2fr 1fr 1fr 1fr auto;">
+        <div class="sg-form-group" style="margin-bottom:0;"><label>F.I.Sh.</label><input name="full_name" class="sg-input" required></div>
+        <div class="sg-form-group" style="margin-bottom:0;"><label>Telefon</label><input name="phone" class="sg-input" placeholder="+998..." required></div>
+        <div class="sg-form-group" style="margin-bottom:0;"><label>Mashina #</label><input name="car_number" class="sg-input" required></div>
+        <div class="sg-form-group" style="margin-bottom:0;"><label>Sig'im (ballon)</label><input type="number" name="capacity" class="sg-input" value="40" required></div>
+        <button class="sg-btn sg-btn-primary">➕ Qo'shish</button>
+      </form>
+      <div class="sg-divider"></div>
+      <p class="sg-muted">Haydovchilarni yaratish uchun to'liq endpoint keyingi yangilanishda qo'shiladi. Seed bilan yaratilgan haydovchi: <strong>Botir (+998900000002)</strong>, mashina 01A777AA, sig'im 40 ballon.</p>
+    </div>
+  </div>
+
+  <div id="tab-users" class="tab-content" style="display:none;">
+    <div class="sg-card">
+      <h2>👥 Foydalanuvchilar va rollar</h2>
+      <p class="sg-muted">Foydalanuvchilarni boshqarish, rollarni o'zgartirish va bloklash funksiyalari keyingi yangilanishda.</p>
+    </div>
+  </div>
+
+  <div id="tab-regions" class="tab-content" style="display:none;">
+    <div class="sg-card">
+      <h2>🗺️ Hudud spravochniklari</h2>
+      <div id="region-list"></div>
+    </div>
+  </div>
+
+  <div id="tab-settings" class="tab-content" style="display:none;">
+    <div class="sg-card">
+      <h2>⚙️ Tizim sozlamalari</h2>
+      <div class="sg-grid-2">
+        <div class="sg-form-group"><label>Takroriy navbat cheklovi (kun)</label><input type="number" value="20" class="sg-input"></div>
+        <div class="sg-form-group"><label>1 kg narxi (so'm)</label><input type="number" value="2800" class="sg-input"></div>
+        <div class="sg-form-group"><label>GPS yuborish oralig'i (soniya)</label><input type="number" value="30" class="sg-input"></div>
+      </div>
+      <button class="sg-btn sg-btn-primary">Saqlash</button>
+      <p class="sg-muted sg-mt-2">Sozlamalarni saqlash endpointi keyingi yangilanishda (hozircha seed qiymatlari ishlatiladi).</p>
+    </div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.sg-tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.sg-tab').forEach(x => x.classList.remove('sg-tab-active'));
+  t.classList.add('sg-tab-active');
+  document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+  document.getElementById('tab-'+t.dataset.tab).style.display = '';
+  if (t.dataset.tab === 'regions') loadRegions();
+}));
+
+async function loadStats(){
+  const s = await SG.api('/admin/stats');
+  document.getElementById('admin-stats').innerHTML = `
+    <div class="sg-stat-card"><div class="sg-stat-value">${s.households_total}</div><div class="sg-stat-label">Xonadonlar</div></div>
+    <div class="sg-stat-card"><div class="sg-stat-value">${s.orders_pending}</div><div class="sg-stat-label">Navbatda</div></div>
+    <div class="sg-stat-card"><div class="sg-stat-value">${s.orders_on_way}</div><div class="sg-stat-label">Yo'lda</div></div>
+    <div class="sg-stat-card"><div class="sg-stat-value">${s.delivered_today}</div><div class="sg-stat-label">Bugun yetkazildi</div></div>
+    <div class="sg-stat-card"><div class="sg-stat-value">${s.active_drivers}</div><div class="sg-stat-label">Haydovchilar</div></div>
+    <div class="sg-stat-card"><div class="sg-stat-value">${s.active_routes}</div><div class="sg-stat-label">Marshrutlar</div></div>`;
+}
+
+async function loadRegions(){
+  const el = document.getElementById('region-list');
+  const regions = await SG.api('/territory/regions');
+  el.innerHTML = regions.map(r => `<div class="sg-faq-item open"><div class="sg-faq-q">${r.name_uz} <span>${r.districts.length} ta tuman</span></div><div class="sg-faq-a"><ul>${r.districts.map(d => `<li>${d.name_uz}</li>`).join('')}</ul></div></div>`).join('');
+}
+
+document.getElementById('driver-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  SG.showAlert('Haydovchi qo\'shish endpointi keyingi yangilanishda','info');
+});
+
+loadStats(); setInterval(loadStats, 15000);
+</script>
+{% endblock %}
