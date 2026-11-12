@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: smartgaz
+      POSTGRES_PASSWORD: smartgaz_pass
+      POSTGRES_DB: smartgaz
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartgaz -d smartgaz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://smartgaz:smartgaz_pass@db:5432/smartgaz
+      DATABASE_URL_SYNC: postgresql://smartgaz:smartgaz_pass@db:5432/smartgaz
+      SECRET_KEY: "change-me-in-production-please-use-a-long-random-value"
+      APP_ENV: production
+      DEBUG: "false"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "python seed.py &&
+             alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+volumes:
+  pgdata:
